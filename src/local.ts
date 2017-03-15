@@ -1,13 +1,15 @@
-import { Node, Commands, 
-         Constants, MessagesQueue, 
-         EventDOMNodeAttributes, 
-         Pipe}  from './common'
-         
+import {
+  Node, Commands,
+  Constants, MessagesQueue,
+  EventDOMNodeAttributes,
+  Pipe
+} from './common'
+
 class LocalContainer {
   public index;
-  constructor(public queueIndex, 
-              public domElement, 
-              public name) {
+  constructor(public queueIndex,
+    public domElement,
+    public name) {
     this.domElement = domElement;
     this.name = name;
     this.queueIndex = queueIndex;
@@ -62,7 +64,7 @@ function serializeEventVal(queueIndex, val) {
 function generalEventHandler(queueIndex, evtTarget, evtName, ev) {
   // console.log('generalEventHandler', arguments)
   const queue = queuesByIndex[queueIndex];
-  const evtJSON = {extraData: {}};
+  const evtJSON = { extraData: {} };
   const path = ev.path || EventDOMNodeAttributes.map((field) => ev[field]).filter((x) => x);
   path.forEach(node => {
     evtJSON.extraData[serializeEventVal(queueIndex, node)] = {
@@ -95,62 +97,62 @@ function applyMessages(queueIndex, messages) {
     //console.log('applyMessage:', msg);
     switch (msgType) {
       case (Commands.createContainer):
-      elements[msg[1]] = containers[msg[2]].domElement;
-      break;
+        elements[msg[1]] = containers[msg[2]].domElement;
+        break;
       case (Commands.createElement):
         elements[msg[1]] = doc.createElement(msg[2].toLowerCase());
         elements[msg[1]][Constants.QUEUE_INDEX] = queueIndex;
         elements[msg[1]][Constants.NODE_INDEX] = msg[1];
         break;
       case (Commands.createTextNode):
-      elements[msg[1]] = doc.createTextNode(msg[2]);
-      elements[msg[1]][Constants.QUEUE_INDEX] = queueIndex;
-      elements[msg[1]][Constants.NODE_INDEX] = msg[1];
-      break;
+        elements[msg[1]] = doc.createTextNode(msg[2]);
+        elements[msg[1]][Constants.QUEUE_INDEX] = queueIndex;
+        elements[msg[1]][Constants.NODE_INDEX] = msg[1];
+        break;
       case (Commands.createComment):
-      elements[msg[1]] = doc.createComment(msg[2]);
-      elements[msg[1]][Constants.QUEUE_INDEX] = queueIndex;
-      elements[msg[1]][Constants.NODE_INDEX] = msg[1];
-      break;
+        elements[msg[1]] = doc.createComment(msg[2]);
+        elements[msg[1]][Constants.QUEUE_INDEX] = queueIndex;
+        elements[msg[1]][Constants.NODE_INDEX] = msg[1];
+        break;
       case (Commands.createDocumentFragment):
-      elements[msg[1]] = doc.createDocumentFragment(msg[2]);
-      break;
+        elements[msg[1]] = doc.createDocumentFragment(msg[2]);
+        break;
       case (Commands.appendChild):
-      elements[msg[1]].appendChild(elements[msg[2]]);
-      break;
+        elements[msg[1]].appendChild(elements[msg[2]]);
+        break;
       case (Commands.insertBefore):
-      elements[msg[1]].insertBefore(elements[msg[2]], msg[3] ? elements[msg[3]] : null);
-      break;
+        elements[msg[1]].insertBefore(elements[msg[2]], msg[3] ? elements[msg[3]] : null);
+        break;
       case (Commands.removeChild):
-      elements[msg[1]].removeChild(elements[msg[2]]);
-      break;
-        case (Commands.replaceChild):
-          elements[msg[1]].replaceChild(elements[msg[2]], elements[msg[3]]);
+        elements[msg[1]].removeChild(elements[msg[2]]);
+        break;
+      case (Commands.replaceChild):
+        elements[msg[1]].replaceChild(elements[msg[2]], elements[msg[3]]);
         break;
       case (Commands.setAttribute):
-      elements[msg[1]].setAttribute(msg[2], msg[3]);
-      break;
+        elements[msg[1]].setAttribute(msg[2], msg[3]);
+        break;
       case (Commands.removeAttribute):
-      elements[msg[1]].removeAttribute(msg[2]);
-      break;
+        elements[msg[1]].removeAttribute(msg[2]);
+        break;
       case (Commands.setStyles):
-      elements[msg[1]].style = msg[2];
-      break;
+        elements[msg[1]].style = msg[2];
+        break;
       case (Commands.setStyle):
-      elements[msg[1]].style[msg[2]] = msg[3];
-      break;
+        elements[msg[1]].style[msg[2]] = msg[3];
+        break;
       case (Commands.innerHTML):
-      elements[msg[1]].innerHTML = msg[2];
-      break;
+        elements[msg[1]].innerHTML = msg[2];
+        break;
       case (Commands.innerText):
-      elements[msg[1]].innerText = msg[2];
-      break;
+        elements[msg[1]].innerText = msg[2];
+        break;
       case (Commands.textContent):
-      elements[msg[1]].textContent = msg[2];
-      break;
+        elements[msg[1]].textContent = msg[2];
+        break;
       case (Commands.setValue):
-      elements[msg[1]].value = msg[2];
-      break;
+        elements[msg[1]].value = msg[2];
+        break;
       case (Commands.pause):
         elements[msg[1]].pause();
         break;
@@ -160,24 +162,26 @@ function applyMessages(queueIndex, messages) {
       case (Commands.src):
         elements[msg[1]].src = msg[2];
       case (Commands.addEventListener):
-      const func = generalEventHandler.bind(null, queueIndex, msg[1], msg[2]);
-      events[msg[2]] = events[msg[2]] || {};
-      events[msg[2]][msg[3]] = func;
-      elements[msg[1]].addEventListener(msg[2], func, msg[4]);
-      break;
+        const func = generalEventHandler.bind(null, queueIndex, msg[1], msg[2]);
+        events[msg[2]] = events[msg[2]] || {};
+        events[msg[2]][msg[3]] = func;
+        elements[msg[1]].addEventListener(msg[2], func, msg[4]);
+        break;
       case (Commands.removeEventListener):
-      events[msg[2]] = events[msg[2]] || {};
-      const origFunc = events[msg[2]][msg[3]];
-      elements[msg[1]].removeEventListener(msg[2], origFunc);
-      break;
+        events[msg[2]] = events[msg[2]] || {};
+        const origFunc = events[msg[2]][msg[3]];
+        elements[msg[1]].removeEventListener(msg[2], origFunc);
+        break;
       case (Commands.initiated):
         handleRemoteInit(queueIndex);
         break;
       case (Commands.invokeNative):
-      if (nativeInvocations[msg[2]]) {
-        nativeInvocations[msg[2]](elements[msg[1]], msg[3]);
-      }
-      break;
+        if (nativeInvocations[msg[2]]) {
+          nativeInvocations[msg[2]](elements[msg[1]], msg[3]);
+        }
+        break;
+        default:
+          break;
     }
   });
 }
